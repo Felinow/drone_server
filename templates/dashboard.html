@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Données Drone</title>
+    <meta charset="utf-8">
+    
+    <!-- Bootstrap -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+
+    <style>
+        #map {
+            height: 500px;
+            margin-bottom: 30px;
+        }
+    </style>
+</head>
+<body>
+<div class="container mt-5">
+    <h1>Données récentes du drone</h1>
+
+    <!-- 🔴 Bouton pour réinitialiser les données -->
+    <form method="POST" action="/reset" onsubmit="return confirm('Effacer toutes les données GPS ?');">
+        <button type="submit" class="btn btn-danger mb-3">🗑️ Réinitialiser les données</button>
+    </form>
+
+    <!-- 🗺️ Carte Leaflet -->
+    <div id="map"></div>
+
+    <!-- 📊 Tableau des données -->
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Temps</th>
+                <th>Latitude</th>
+                <th>Longitude</th>
+                <th>Altitude</th>
+                <th>Vitesse</th>
+                <th>Mode</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for row in data %}
+            <tr>
+                <td>{{ row[1] }}</td>
+                <td>{{ row[2] }}</td>
+                <td>{{ row[3] }}</td>
+                <td>{{ row[4] }}</td>
+                <td>{{ row[5] }}</td>
+                <td>{{ row[6] }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<!-- Leaflet JS -->
+<script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+
+<script>
+    var map = L.map('map').setView([-4.3, 15.3], 13);
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '© OpenStreetMap contributors',
+        maxZoom: 18
+    }).addTo(map);
+
+    {% if data %}
+        var points = [
+            {% for row in data %}
+                [{{ row[2] }}, {{ row[3] }}],
+            {% endfor %}
+        ];
+
+        if (points.length > 0) {
+            var path = L.polyline(points, { color: 'blue' }).addTo(map);
+            map.fitBounds(path.getBounds());
+
+            var last = points[0];
+            var popup = `
+                📍 <strong>Drone ici</strong><br>
+                🕒 {{ data[0][1] }}<br>
+                🌍 Lat: {{ data[0][2] }}, Lon: {{ data[0][3] }}<br>
+                🛬 Alt: {{ data[0][4] }}
+            `;
+            L.marker(last).addTo(map).bindPopup(popup).openPopup();
+        }
+    {% endif %}
+</script>
+
+<!-- 🔄 Rafraîchissement automatique -->
+<script>
+    setInterval(function() {
+        location.reload();
+    }, 10000); // toutes les 10 secondes
+</script>
+</body>
+</html>
