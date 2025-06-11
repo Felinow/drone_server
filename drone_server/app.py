@@ -15,6 +15,7 @@ def init_db():
         altitude REAL,
         speed REAL,
         mode TEXT
+        source TEXT DEFAULT 'unknown'
     )''')
     conn.commit()
     conn.close()
@@ -28,10 +29,17 @@ def dashboard():
     conn.close()
     return render_template('dashboard.html', data=rows)
 
-@app.route('/receive', methods=['POST'])
+@app.route('/update_location', methods=['POST'])
 def receive_data():
     data = request.get_json()
-    print("Données reçues :", data)
+    latitude = data.get('latitude')
+    longitude = data.get('longitude')
+    altitude = data.get('altitude', 0.0)
+    speed = data.get('speed', 0.0)
+    mode = data.get('mode', 'FLUTTER')
+    source = data.get('source', 'flutter')
+    print(f"Données de {source} reçues : {data}")
+
 
     conn = sqlite3.connect('data.db')
     c = conn.cursor()
