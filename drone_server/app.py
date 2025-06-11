@@ -1,4 +1,4 @@
-from flask import Flask, request, render_template
+from flask import Flask, request, render_template, redirect
 import sqlite3
 
 app = Flask(__name__)
@@ -23,7 +23,7 @@ def init_db():
 def dashboard():
     conn = sqlite3.connect('data.db')
     c = conn.cursor()
-    c.execute("SELECT * FROM drone_data ORDER BY timestamp DESC LIMIT 10")
+    c.execute("SELECT * FROM drone_data ORDER BY timestamp DESC LIMIT 100")
     rows = c.fetchall()
     conn.close()
     return render_template('dashboard.html', data=rows)
@@ -40,6 +40,15 @@ def receive_data():
     conn.commit()
     conn.close()
     return {'status': 'ok'}
+
+@app.route('/reset', methods=['POST'])
+def reset_data():
+    conn = sqlite3.connect('data.db')
+    c = conn.cursor()
+    c.execute("DELETE FROM drone_data")
+    conn.commit()
+    conn.close()
+    return redirect("/")
 
 if __name__ == '__main__':
     init_db()

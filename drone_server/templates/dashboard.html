@@ -21,6 +21,11 @@
 <div class="container mt-5">
     <h1>Données récentes du drone</h1>
 
+    <!-- 🔴 Bouton pour réinitialiser les données -->
+    <form method="POST" action="/reset" onsubmit="return confirm('Effacer toutes les données GPS ?');">
+        <button type="submit" class="btn btn-danger mb-3">🗑️ Réinitialiser les données</button>
+    </form>
+
     <!-- Carte Leaflet -->
     <div id="map"></div>
 
@@ -55,22 +60,30 @@
 <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
 
 <script>
-    // Initialisation de la carte centrée par défaut sur Kinshasa
     var map = L.map('map').setView([-4.3, 15.3], 13);
 
-    // Ajout de la couche OpenStreetMap
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '© OpenStreetMap',
+        attribution: '© OpenStreetMap contributors',
         maxZoom: 18
     }).addTo(map);
 
-    // Si des données sont disponibles, ajouter le marqueur
     {% if data %}
-        var lat = {{ data[0][2] }};
-        var lon = {{ data[0][3] }};
-        var popup = "📍 Drone ici<br>{{ data[0][1] }}";
-        var marker = L.marker([lat, lon]).addTo(map).bindPopup(popup).openPopup();
-        map.setView([lat, lon], 16);
+        // 🟢 Extraire tous les points
+        var points = [
+            {% for row in data %}
+                [{{ row[2] }}, {{ row[3] }}],
+            {% endfor %}
+        ];
+
+        if (points.length > 0) {
+            // 🔵 Polyligne du trajet
+            var path = L.polyline(points, { color: 'blue' }).addTo(map);
+            map.fitBounds(path.getBounds());
+
+            // 📍 Marqueur sur le dernier point
+            var last = points[0];
+            L.marker(last).addTo(map).bindPopup("📍 Drone ici").openPopup();
+        }
     {% endif %}
 </script>
 </body>
