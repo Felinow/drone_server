@@ -41,8 +41,8 @@ def receive_data():
 
     conn = sqlite3.connect('data.db')
     c = conn.cursor()
-    c.execute("INSERT INTO drone_data (latitude, longitude, altitude, speed, mode) VALUES (?, ?, ?, ?, ?)",
-              (data['latitude'], data['longitude'], data['altitude'], data['speed'], data['mode']))
+    c.execute("INSERT INTO drone_data (latitude, longitude, source) VALUES (?, ?, ?)",
+              (data['latitude'], data['longitude'], 'flutter'))
     conn.commit()
     conn.close()
     return {'status': 'ok'}
