@@ -34,9 +34,7 @@ def receive_data():
     data = request.get_json()
     latitude = data.get('latitude')
     longitude = data.get('longitude')
-    altitude = data.get('altitude', 0.0)
-    speed = data.get('speed', 0.0)
-    mode = data.get('mode', 'FLUTTER')
+
     source = data.get('source', 'flutter')
     print(f"Données de {source} reçues : {data}")
 
