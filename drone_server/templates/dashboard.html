@@ -80,9 +80,13 @@
             var path = L.polyline(points, { color: 'blue' }).addTo(map);
             map.fitBounds(path.getBounds());
 
-            // 📍 Marqueur sur le dernier point
+            // 📍 Marqueur sur le dernier point avec info complète
             var last = points[0];
-            L.marker(last).addTo(map).bindPopup("📍 Drone ici").openPopup();
+            var popup = `
+                {{ data[0][1] }}<br>
+                Lat: {{ data[0][2] }}, Lon: {{ data[0][3] }}, Alt: {{ data[0][4] }}
+            `;
+            L.marker(last).addTo(map).bindPopup(popup).openPopup();
         }
     {% endif %}
 </script>
