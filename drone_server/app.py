@@ -47,6 +47,19 @@ def receive_data():
     conn.close()
     return {'status': 'ok'}
 
+@app.route('/last_position', methods=['GET'])
+def last_position():
+    conn = sqlite3.connect('data.db')
+    c = conn.cursor()
+    c.execute("SELECT latitude, longitude FROM drone_data WHERE source='flutter' ORDER BY timestamp DESC LIMIT 1")
+    row = c.fetchone()
+    conn.close()
+    if row:
+        return jsonify({'latitude': row[0], 'longitude': row[1]})
+    else:
+        return jsonify({'error': 'no data'}), 404
+
+
 @app.route('/reset', methods=['POST'])
 def reset_data():
     conn = sqlite3.connect('data.db')
